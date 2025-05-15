@@ -1,4 +1,4 @@
-const baseUrl = 'http://datetimeapi.runasp.net/api/time';
+const baseUrl = 'https://datetimeapi.runasp.net/api/time';
 
 export const getTimezones = async () => {
   const response = await fetch(`${baseUrl}/timezones`);
