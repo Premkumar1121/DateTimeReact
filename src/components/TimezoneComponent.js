@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getTimezones, getSelectedTime } from './TimezoneService';
 
 const TimezoneComponent = () => {
@@ -6,6 +6,21 @@ const TimezoneComponent = () => {
   const [selectedTimezone, setSelectedTimezone] = useState('UTC');
   const [localTime, setLocalTime] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+
+  // Wrap in useCallback so it's stable and can be a dependency
+  const updateSelectedTime = useCallback(async () => {
+    try {
+      const response = await getSelectedTime(selectedTimezone);
+      setSelectedTime(response.selectedTime);
+    } catch (error) {
+      console.error('Error fetching selected time:', error);
+    }
+  }, [selectedTimezone]);
+
+  const updateLocalTime = () => {
+    const now = new Date();
+    setLocalTime(now.toLocaleString());
+  };
 
   useEffect(() => {
     const fetchTimezones = async () => {
@@ -19,36 +34,14 @@ const TimezoneComponent = () => {
 
     fetchTimezones();
 
-    
     const interval = setInterval(() => {
       updateLocalTime();
       updateSelectedTime();
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [selectedTimezone]);
+  }, [updateSelectedTime]); // ✅ Only include the stable version
 
-
-
-
-
-  const updateLocalTime = () => {
-    const now = new Date();
-    setLocalTime(now.toLocaleString());
-  };
-
-
-
-  const updateSelectedTime = async () => {
-    try {
-      const response = await getSelectedTime(selectedTimezone);
-      setSelectedTime(response.selectedTime);
-    } catch (error) {
-      console.error('Error fetching selected time:', error);
-    }
-  };
-
-  
   return (
     <div>
       <h2>Real-Time Timezone Converter</h2>
